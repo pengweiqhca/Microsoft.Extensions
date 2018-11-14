@@ -44,4 +44,62 @@
 
   <Import Project="eng\targets\Packaging.targets" Condition=" '$(MSBuildProjectExtension)' == '.csproj' " />
   <Import Project="eng\targets\ResolveReferences.targets" Condition=" '$(DisableReferenceRestrictions)' != 'true' AND '$(MSBuildProjectExtension)' == '.csproj' " />
+
+    <ItemGroup>
+    <PackageReference Include="xunit.runner.console" Version="2.4.1" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <DistributedTestPlatform Include="Windows10.x64" />
+  </ItemGroup>
+
+  <Target Name="CreateTestPayload" Returns="@(TestPayload)">
+
+    <ItemGroup>
+      <_TargetFrameworks Remove="@(_TargetFrameworks)" />
+      <_TargetFrameworks Include="$(TargetFrameworks);$(TargetFramework)" />
+    </ItemGroup>
+
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+             Targets="_CreateTestPayloadInner"
+             Properties="TargetFramework=%(_TargetFrameworks.Identity)">
+      <Output TaskParameter="TargetOutputs" ItemName="TestPayload" />
+    </MSBuild>
+  </Target>
+
+  <Target Name="CollectXunitConsoleRunner" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PropertyGroup>
+      <XunitConsoleRunnerDir>$([System.IO.Path]::GetDirectoryName($(XunitConsole472Path)))</XunitConsoleRunnerDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <XunitConsoleRunnerFiles Include="$(XunitConsoleRunnerDir)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(XunitConsoleRunnerFiles)" DestinationFolder="$(PublishDir)" />
+  </Target>
+
+  <Target Name="_CreateTestPayloadInner" DependsOnTargets="Publish;CollectXunitConsoleRunner" Condition="'$(IsTestProject)' == 'true'" Returns="@(TestPayload)">
+
+    <ConvertToAbsolutePath Paths="$(PublishDir)">
+      <Output TaskParameter="AbsolutePaths" PropertyName="PublishAbsoluteDir" />
+    </ConvertToAbsolutePath>
+
+    <ItemGroup>
+        <!-- <_CopyItems Include="$(PublishAbsoluteDir)\*.*" /> -->
+        <_CopyItems Include="$(MSBuildThisFileDirectory)test\vstest\runtests.cmd" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
+        <_CopyItems Include="$(MSBuildThisFileDirectory)test\vstest\dotnet-install.ps1" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
+        <_CopyItems Include="$(MSBuildThisFileDirectory)test\xunit\runtests.cmd" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    </ItemGroup>
+
+    <!-- <Copy SourceFiles="@(_CopyItems)" DestinationFolder="$(PublishAbsoluteDir)\$(MSBuildProjectName).$(TargetFramework).Helix" /> -->
+    <Copy SourceFiles="@(_CopyItems)" DestinationFolder="$(PublishAbsoluteDir)" />
+
+    <ItemGroup>
+      <TestPayload Include="$(PublishAbsoluteDir.TrimEnd('\').TrimEnd('\'))">
+        <TestAssembly>$(TargetFileName)</TestAssembly>
+        <TestName>$(MSBuildProjectName)/$(TargetFramework)</TestName>
+        <Command>runtests.cmd $(TargetFileName) $(TargetFrameworkIdentifier) $(_Microsoft_NETCore_App_Version)</Command>
+        <TestPlatform>%(DistributedTestPlatform.Identity)</TestPlatform>
+      </TestPayload>
+    </ItemGroup>
+  </Target>
+
 </Project>
