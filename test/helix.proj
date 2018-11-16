@@ -1,9 +1,12 @@
 <Project DefaultTargets="Test">
 
   <!-- Version included until we get global.json generation to support this SDK. -->
-  <Sdk Name="Microsoft.DotNet.Helix.Sdk" Version="1.0.0-beta.18564.11" />
+  <Sdk Name="Microsoft.DotNet.Helix.Sdk" Version="1.0.0-beta.18565.5" />
+
+  <UsingTask TaskName="CreateXUnitWorkItems " AssemblyFile="C:\Users\haok\.nuget\packages\microsoft.dotnet.helix.sdk\1.0.0-beta.18565.5\tools\netcoreapp2.1\Microsoft.DotNet.Helix.Sdk.dll"/>
 
   <Target Name="Gather" BeforeTargets="Test">
+
     <ItemGroup>
       <ProjectsToTest Include="$(ProjectsToTest)" />
     </ItemGroup>
@@ -13,28 +16,17 @@
               BuildInParallel="true">
       <Output TaskParameter="TargetOutputs" ItemName="TestPayload" />
     </MSBuild>
+    
     <ItemGroup>
-      <TestProp Include="$(ProjectsToTest)" />
+      <XunitDlls Include="C:\Github\Extensions\src\Options\test\bin\Debug\net461\Microsoft.Extensions.Options.Test.dll" />
+      <XunitDlls Include="C:\Github\Extensions\src\Primitives\test\bin\Debug\net461\publish\Microsoft.Extensions.Primitives.Test.dll" />
+      <XunitDllDirs Include="C:\Github\Extensions\src\Options\test\bin\Debug\net461" />
+      <XunitDllDirs Include="C:\Github\Extensions\src\Primitives\test\bin\Debug\net461\publish" />
     </ItemGroup>
+    <CreateXUnitWorkItems XUnitDllPaths="@(XunitDlls)" XUnitDllDirectories="@(XunitDllDirs)" >
+      <Output TaskParameter="XUnitWorkItems" ItemName="HelixWorkItem"/>
+    </CreateXUnitWorkItems>
 
-    <ItemGroup>
-      <!-- Directory that is zipped up and sent as a correlation payload -->
-      <HelixCorrelationPayload Include="dotnet-sdk">
-        <Uri>https://dotnetcli.blob.core.windows.net/dotnet/Sdk/3.0.100-preview-009730/dotnet-sdk-3.0.100-preview-009730-win-x64.zip</Uri>
-      </HelixCorrelationPayload>
-      <!-- <HelixCorrelationPayload Include="dotnet-cli">
-        <Uri>https://dotnetcli.blob.core.windows.net/dotnet/Runtime/3.0.0-preview1-26907-05/dotnet-runtime-3.0.0-preview1-26907-05-win-x64.zip</Uri>
-      </HelixCorrelationPayload> -->
-      <!-- Workitem that is run on a machine from the $(HelixTargetQueues) queue -->
-      <HelixWorkItem Include="%(TestPayload.TestName)">
-        <Command>%(TestPayload.Command)</Command>
-        <!-- A directory that is zipped up and send as the work item payload -->
-        <PayloadDirectory>%(TestPayload.Identity)</PayloadDirectory>
-
-        <!-- A TimeSpan that specifies the work item execution timeout -->
-        <Timeout>00:30:00</Timeout>
-      </HelixWorkItem>
-    </ItemGroup>
   </Target>
 
   <PropertyGroup>
