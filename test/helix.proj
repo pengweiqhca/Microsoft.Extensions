@@ -1,7 +1,7 @@
 <Project DefaultTargets="Test">
 
   <!-- Version included until we get global.json generation to support this SDK. -->
-  <Sdk Name="Microsoft.DotNet.Helix.Sdk" Version="1.0.0-beta.18565.5" />
+  <Sdk Name="Microsoft.DotNet.Helix.Sdk" Version="1.0.0-beta.18569.3" />
 
   <UsingTask TaskName="CreateXUnitWorkItems " AssemblyFile="C:\Users\haok\.nuget\packages\microsoft.dotnet.helix.sdk\1.0.0-beta.18565.5\tools\netcoreapp2.1\Microsoft.DotNet.Helix.Sdk.dll"/>
 
@@ -16,12 +16,17 @@
               BuildInParallel="true">
       <Output TaskParameter="TargetOutputs" ItemName="TestPayload" />
     </MSBuild>
-    
     <ItemGroup>
-      <XunitDlls Include="C:\Github\Extensions\src\Options\test\bin\Debug\net461\Microsoft.Extensions.Options.Test.dll" />
-      <XunitDlls Include="C:\Github\Extensions\src\Primitives\test\bin\Debug\net461\publish\Microsoft.Extensions.Primitives.Test.dll" />
-      <XunitDllDirs Include="C:\Github\Extensions\src\Options\test\bin\Debug\net461" />
-      <XunitDllDirs Include="C:\Github\Extensions\src\Primitives\test\bin\Debug\net461\publish" />
+      <!-- <XunitDlls Include="%(TestPayload.TestAssembly)" KeepDuplicates="true" /> -->
+      <XunitDlls Include="Microsoft.Extensions.Primitives.Tests.dll" KeepDuplicates="true" />
+      <!-- <XunitDlls Include="Microsoft.Extensions.Primitives.Tests.dll" KeepDuplicates="true" />
+      <XunitDlls Include="Microsoft.Extensions.Primitives.Tests.dll" KeepDuplicates="true" /> -->
+      <XunitDlls Include="Microsoft.Extensions.Sources.Tests.dll" KeepDuplicates="true" />
+      <!-- <XunitDlls Include="Microsoft.Extensions.Sources.Tests.dll" KeepDuplicates="true" />
+      <XunitDlls Include="Microsoft.Extensions.Sources.Tests.dll" KeepDuplicates="true" /> -->
+      <XunitDllDirs Include="C:\Github\Extensions\src\Shared\test\bin\Debug\net461\publish" />
+      <XunitDllDirs Include="C:\Github\Extensions\src\Primitives\test\bin\Debug\netcoreapp2.0\publish" />
+      <!-- <XunitDllDirs Include="%(TestPayload.Identity)" /> -->
     </ItemGroup>
     <CreateXUnitWorkItems XUnitDllPaths="@(XunitDlls)" XUnitDllDirectories="@(XunitDllDirs)" >
       <Output TaskParameter="XUnitWorkItems" ItemName="HelixWorkItem"/>
