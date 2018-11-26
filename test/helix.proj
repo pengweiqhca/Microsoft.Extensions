@@ -1,7 +1,7 @@
 <Project DefaultTargets="Test">
 
   <!-- Version included until we get global.json generation to support this SDK. -->
-  <Sdk Name="Microsoft.DotNet.Helix.Sdk" Version="1.0.0-beta.18569.3" />
+  <Sdk Name="Microsoft.DotNet.Helix.Sdk" Version="1.0.0-beta.18575.1" />
 
   <UsingTask TaskName="CreateXUnitWorkItems " AssemblyFile="C:\Users\haok\.nuget\packages\microsoft.dotnet.helix.sdk\1.0.0-beta.18565.5\tools\netcoreapp2.1\Microsoft.DotNet.Helix.Sdk.dll"/>
 
@@ -17,39 +17,37 @@
       <Output TaskParameter="TargetOutputs" ItemName="TestPayload" />
     </MSBuild>
     <ItemGroup>
-      <!-- <XunitDlls Include="%(TestPayload.TestAssembly)" KeepDuplicates="true" /> -->
-      <XunitDlls Include="Microsoft.Extensions.Primitives.Tests.dll" KeepDuplicates="true" />
-      <!-- <XunitDlls Include="Microsoft.Extensions.Primitives.Tests.dll" KeepDuplicates="true" />
-      <XunitDlls Include="Microsoft.Extensions.Primitives.Tests.dll" KeepDuplicates="true" /> -->
-      <XunitDlls Include="Microsoft.Extensions.Sources.Tests.dll" KeepDuplicates="true" />
-      <!-- <XunitDlls Include="Microsoft.Extensions.Sources.Tests.dll" KeepDuplicates="true" />
-      <XunitDlls Include="Microsoft.Extensions.Sources.Tests.dll" KeepDuplicates="true" /> -->
-      <XunitDllDirs Include="C:\Github\Extensions\src\Shared\test\bin\Debug\net461\publish" />
-      <XunitDllDirs Include="C:\Github\Extensions\src\Primitives\test\bin\Debug\netcoreapp2.0\publish" />
-      <!-- <XunitDllDirs Include="%(TestPayload.Identity)" /> -->
+      <!-- <XUnitProjects Include="%(TestPayload.Identity)" /> -->
+      <XUnitProjects Include="C:\Github\Extensions\src\Shared\test\Microsoft.Extensions.Sources.Tests.csproj"
+        PublishDirectory="C:\Github\Extensions\src\Shared\test\bin\Debug\net461\publish"
+        TargetPath="C:\Github\Extensions\src\Shared\test\bin\Debug\net461\publish\Microsoft.Extensions.Sources.Tests.dll"
+        RuntimeTargetFramework="net461"
+      />
+      <HelixCorrelationPayload Include="xunit-runner">
+        <Uri>https://api.nuget.org/v3-flatcontainer/xunit.runner.console/2.4.1/xunit.runner.console.2.4.1.nupkg</Uri>
+     </HelixCorrelationPayload>
+
     </ItemGroup>
-    <CreateXUnitWorkItems XUnitDllPaths="@(XunitDlls)" XUnitDllDirectories="@(XunitDllDirs)" >
+    
+    <CreateXUnitWorkItems XUnitProjects="@(XUnitProjects)" IsPosixShell="false">
       <Output TaskParameter="XUnitWorkItems" ItemName="HelixWorkItem"/>
     </CreateXUnitWorkItems>
 
   </Target>
 
   <PropertyGroup>
-    <!-- The 'source' value reported to helix  -->
-    <HelixSource>aspnet/extensions</HelixSource>
-    <!-- The 'type' value reported to helix  -->
+    <HelixSource>pr/aspnet/extensions</HelixSource>
     <HelixType>ci</HelixType>
-    <!-- The 'build' value reported to helix package version  -->
     <!-- TODO: use package version -->
     <HelixBuild>$([System.DateTime]::Now.ToString(yyyyMMdd-hhmmss))</HelixBuild>
     <WaitForWorkItemCompletion>false</WaitForWorkItemCompletion>
     <!-- TODO: ask for ability to specify both cli/sdk payload uris -->
-    <IncludeDotNetCli>false</IncludeDotNetCli>
+    <IncludeDotNetCli>true</IncludeDotNetCli>
+    <DotNetCliPackageType>sdk</DotNetCliPackageType>
 
-    <!-- The helix queue this job should run on. -->
     <!--<HelixTargetQueues Condition="'$(TestPlatform)' == 'Windows10.x64'">Windows.10.Amd64.Open</HelixTargetQueues>-->
     <HelixTargetQueues>Windows.10.Amd64.Open</HelixTargetQueues>
-    <!-- <HelixTargetQueues>Windows.10.Amd64.Open;Ubuntu.1604.Open</HelixTargetQueues> -->
+    <!-- <HelixTargetQueues>Windows.10.Amd64.Open;Ubuntu.1604.Amd64.Open</HelixTargetQueues> -->
     
     <!--
       'true' to enable the xunit reporter. Default 'false'
