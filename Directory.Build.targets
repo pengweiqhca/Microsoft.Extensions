@@ -83,20 +83,20 @@
     </ConvertToAbsolutePath>
 
     <ItemGroup>
-        <!-- <_CopyItems Include="$(PublishAbsoluteDir)\*.*" /> -->
         <_CopyItems Include="$(MSBuildThisFileDirectory)test\vstest\runtests.cmd" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
+        <!-- switch to downloading this either before publish or on helix workers -->
         <_CopyItems Include="$(MSBuildThisFileDirectory)test\vstest\dotnet-install.ps1" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
         <_CopyItems Include="$(MSBuildThisFileDirectory)test\xunit\runtests.cmd" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     </ItemGroup>
 
-    <!-- <Copy SourceFiles="@(_CopyItems)" DestinationFolder="$(PublishAbsoluteDir)\$(MSBuildProjectName).$(TargetFramework).Helix" /> -->
     <Copy SourceFiles="@(_CopyItems)" DestinationFolder="$(PublishAbsoluteDir)" />
 
     <ItemGroup>
       <TestPayload Include="$(PublishAbsoluteDir.TrimEnd('\').TrimEnd('\'))">
         <TestAssembly>$(TargetFileName)</TestAssembly>
         <TestName>$(MSBuildProjectName)/$(TargetFramework)</TestName>
-        <Command>runtests.cmd $(TargetFileName) $(TargetFrameworkIdentifier) $(_Microsoft_NETCore_App_Version)</Command>
+        <!-- <Command>runtests.cmd $(TargetFileName) $(_Microsoft_NETCore_App_Version)</Command> -->
+        <Command>runtests.cmd $(TargetFileName) 2.1.500</Command>
         <TestPlatform>%(DistributedTestPlatform.Identity)</TestPlatform>
       </TestPayload>
     </ItemGroup>
