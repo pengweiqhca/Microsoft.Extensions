@@ -3,14 +3,10 @@
   <!-- Version included until we get global.json generation to support this SDK. -->
   <Sdk Name="Microsoft.DotNet.Helix.Sdk" Version="1.0.0-beta.18575.1" />
 
-  <UsingTask TaskName="CreateXUnitWorkItems " AssemblyFile="C:\Users\haok\.nuget\packages\microsoft.dotnet.helix.sdk\1.0.0-beta.18565.5\tools\netcoreapp2.1\Microsoft.DotNet.Helix.Sdk.dll"/>
-
   <Target Name="Gather" BeforeTargets="Test">
-
     <ItemGroup>
       <ProjectsToTest Include="$(ProjectsToTest)" />
     </ItemGroup>
-
     <MSBuild Projects="@(ProjectsToTest)"
               Targets="CreateTestPayload"
               BuildInParallel="true">
@@ -32,9 +28,8 @@
     <HelixBuild>$([System.DateTime]::Now.ToString(yyyyMMdd-hhmmss))</HelixBuild>
     <WaitForWorkItemCompletion>false</WaitForWorkItemCompletion>
 
-    <!--<HelixTargetQueues Condition="'$(TestPlatform)' == 'Windows10.x64'">Windows.10.Amd64.Open</HelixTargetQueues>-->
+    <!-- TODO: need job per target queue? <HelixTargetQueues Condition="'$(TestPlatform)' == 'Windows10.x64'">Windows.10.Amd64.Open</HelixTargetQueues>-->
     <HelixTargetQueues>Windows.10.Amd64.Open</HelixTargetQueues>
-    <!-- <HelixTargetQueues>Windows.10.Amd64.Open;Ubuntu.1604.Amd64.Open</HelixTargetQueues> -->
     
     <!--
       'true' to enable the xunit reporter. Default 'false'
