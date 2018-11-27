@@ -17,20 +17,9 @@
       <Output TaskParameter="TargetOutputs" ItemName="TestPayload" />
     </MSBuild>
     <ItemGroup>
-      <!-- Directory that is zipped up and sent as a correlation payload -->
-      <!-- <HelixCorrelationPayload Include="dotnet-sdk">
-        <Uri>https://dotnetcli.blob.core.windows.net/dotnet/Sdk/3.0.100-preview-009730/dotnet-sdk-3.0.100-preview-009730-win-x64.zip</Uri>
-      </HelixCorrelationPayload> -->
-      <!-- <HelixCorrelationPayload Include="dotnet-cli">
-        <Uri>https://dotnetcli.blob.core.windows.net/dotnet/Runtime/3.0.0-preview1-26907-05/dotnet-runtime-3.0.0-preview1-26907-05-win-x64.zip</Uri>
-      </HelixCorrelationPayload> -->
-      <!-- Workitem that is run on a machine from the $(HelixTargetQueues) queue -->
       <HelixWorkItem Include="%(TestPayload.TestName)">
         <Command>%(TestPayload.Command)</Command>
-        <!-- A directory that is zipped up and send as the work item payload -->
         <PayloadDirectory>%(TestPayload.Identity)</PayloadDirectory>
-
-        <!-- A TimeSpan that specifies the work item execution timeout -->
         <Timeout>00:30:00</Timeout>
       </HelixWorkItem>
     </ItemGroup>
@@ -42,9 +31,6 @@
     <!-- TODO: use package version -->
     <HelixBuild>$([System.DateTime]::Now.ToString(yyyyMMdd-hhmmss))</HelixBuild>
     <WaitForWorkItemCompletion>false</WaitForWorkItemCompletion>
-    <!-- TODO: ask for ability to specify both cli/sdk payload uris -->
-    <IncludeDotNetCli>true</IncludeDotNetCli>
-    <DotNetCliPackageType>sdk</DotNetCliPackageType>
 
     <!--<HelixTargetQueues Condition="'$(TestPlatform)' == 'Windows10.x64'">Windows.10.Amd64.Open</HelixTargetQueues>-->
     <HelixTargetQueues>Windows.10.Amd64.Open</HelixTargetQueues>
