@@ -1,2 +1,2 @@
 set target=%1
-xunit.console.exe %target% -xml testResults.xml
+%HELIX_CORRELATION_PAYLOAD%\net461\xunit.console.exe %target% -xml testResults.xml

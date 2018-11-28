@@ -3,6 +3,7 @@
   <!-- Version included until we get global.json generation to support this SDK. -->
   <Sdk Name="Microsoft.DotNet.Helix.Sdk" Version="1.0.0-beta.18575.1" />
 
+
   <Target Name="Gather" BeforeTargets="Test">
     <ItemGroup>
       <ProjectsToTest Include="$(ProjectsToTest)" />
@@ -13,9 +14,12 @@
       <Output TaskParameter="TargetOutputs" ItemName="TestPayload" />
     </MSBuild>
     <ItemGroup>
+      <HelixCorrelationPayload Include="$(ArtifactsDir)\Helix">
+        <PayloadDirectory>$(ArtifactsDir)\Helix</PayloadDirectory>
+      </HelixCorrelationPayload>
       <HelixWorkItem Include="%(TestPayload.TestName)">
         <Command>%(TestPayload.Command)</Command>
-        <PayloadDirectory>%(TestPayload.Identity)</PayloadDirectory>
+        <!-- <PayloadDirectory>%(TestPayload.Identity)</PayloadDirectory> -->
         <Timeout>%(TestPayload.TestTimeout)</Timeout>
       </HelixWorkItem>
     </ItemGroup>
@@ -26,22 +30,19 @@
     <HelixType>ci</HelixType>
     <!-- TODO: use package version -->
     <HelixBuild Condition=" '$(CI)' == 'true' ">$(BUILD_BUILDNUMBER)</HelixBuild>
-    <HelixBuild Condition=" '$(CI)' != 'true' ">$([System.DateTime]::Now.ToString(yyyyMMdd-hhmmss))</HelixBuild>
+    <HelixBuild>haok-11-28-17</HelixBuild>
     <WaitForWorkItemCompletion>false</WaitForWorkItemCompletion>
 
-    <!-- TODO: need job per target queue? <HelixTargetQueues Condition="'$(TestPlatform)' == 'Windows10.x64'">Windows.10.Amd64.Open</HelixTargetQueues>-->
-    <HelixTargetQueues>Windows.10.Amd64.Open</HelixTargetQueues>
+    <HelixTargetQueues>Windows.10.Amd64.Open;Ubuntu.1604.Amd64.Open;RedHat.73.Amd64;OSX.1012.Amd64.Open</HelixTargetQueues>
     
     <!--
-      'true' to enable the xunit reporter. Default 'false'
-      The xunit reporter will report test results from a test results
       xml file found in the work item working directory.
       The following file names are accepted:
         testResults.xml
         test-results.xml
         test_results.xml
     -->
-    <EnableXUnitReporter>true</EnableXUnitReporter>
+    <EnableXUnitReporter>false</EnableXUnitReporter>
 
   </PropertyGroup>
 </Project>

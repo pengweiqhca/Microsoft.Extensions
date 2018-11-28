@@ -76,27 +76,50 @@
     <Copy SourceFiles="@(XunitConsoleRunnerFiles)" DestinationFolder="$(PublishDir)" />
   </Target>
 
-  <Target Name="_CreateTestPayloadInner" DependsOnTargets="Publish;CollectXunitConsoleRunner" Condition="'$(IsTestProject)' == 'true'" Returns="@(TestPayload)">
+  <!-- TODO: Exclude non test projects and net461 on non windows -->
+  <Target Name="_CreateTestPayloadInner" 
+    DependsOnTargets="Publish;CollectXunitConsoleRunner" 
+    Condition="'$(IsTestProject)' == 'true' AND ('$(HelixTargetQueue)' == 'Windows.10.Amd64.Open' OR '$(TargetFrameworkIdentifier)' != '.NETFramework')" 
+    Returns="@(TestPayload)">
 
     <ConvertToAbsolutePath Paths="$(PublishDir)">
       <Output TaskParameter="AbsolutePaths" PropertyName="PublishAbsoluteDir" />
     </ConvertToAbsolutePath>
 
-    <ItemGroup>
-        <_CopyItems Include="$(MSBuildThisFileDirectory)test\vstest\runtests.cmd" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
+    <!-- Windows NetCore -->
+    <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' AND '$(HelixTargetQueue)' == 'Windows.10.Amd64.Open'" >
+        <!-- TODO: Clean this up -->
+        <_CopyItems Include="$(MSBuildThisFileDirectory)test\vstest\runtests.cmd" />
         <!-- switch to downloading this either before publish or on helix workers -->
-        <_CopyItems Include="$(MSBuildThisFileDirectory)test\vstest\dotnet-install.ps1" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
-        <_CopyItems Include="$(MSBuildThisFileDirectory)test\xunit\runtests.cmd" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+        <!-- <_CopyItems Include="$(MSBuildThisFileDirectory)test\vstest\dotnet-install.ps1" /> -->
+    </ItemGroup>
+
+    <!-- Windows NetFramework -->
+    <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' AND '$(HelixTargetQueue)' == 'Windows.10.Amd64.Open'" >
+        <!-- TODO: Clean this up -->
+        <_CopyItems Include="$(MSBuildThisFileDirectory)test\xunit\runtests.cmd" />
+    </ItemGroup>
+
+    <!-- NonWindows -->
+    <ItemGroup Condition="'$(HelixTargetQueue)' != 'Windows.10.Amd64.Open'"  >
+        <_CopyItems Include="$(MSBuildThisFileDirectory)test\vstest\runtests.sh" />
     </ItemGroup>
 
     <Copy SourceFiles="@(_CopyItems)" DestinationFolder="$(PublishAbsoluteDir)" />
+
+    <ItemGroup>
+      <PublishDirFiles Include="$(PublishAbsoluteDir)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(PublishDirFiles)" DestinationFolder="$(ArtifactsDir)\Helix\$(TargetFramework)\%(RecursiveDir)" />
 
     <ItemGroup>
       <TestPayload Include="$(PublishAbsoluteDir.TrimEnd('\').TrimEnd('\'))">
         <TestAssembly>$(TargetFileName)</TestAssembly>
         <TestName>$(MSBuildProjectName)/$(TargetFramework)</TestName>
         <!-- <Command>runtests.cmd $(TargetFileName) $(_Microsoft_NETCore_App_Version)</Command> -->
-        <Command>runtests.cmd $(TargetFileName) 2.1.500</Command>
+        <Command Condition="'$(HelixTargetQueue)' == 'Windows.10.Amd64.Open'">%HELIX_CORRELATION_PAYLOAD%\$(TargetFramework)\runtests.cmd %HELIX_CORRELATION_PAYLOAD%\$(TargetFramework)\$(TargetFileName) 2.1.500</Command>
+        <Command Condition="'$(HelixTargetQueue)' != 'Windows.10.Amd64.Open'">$HELIX_CORRELATION_PAYLOAD/$(TargetFramework)/runtests.sh $HELIX_CORRELATION_PAYLOAD/$(TargetFramework)/$(TargetFileName) 2.1.500</Command>
         <TestPlatform>%(DistributedTestPlatform.Identity)</TestPlatform>
         <TestTimeout>$(DistributedTestTimeout)</TestTimeout>
       </TestPayload>
