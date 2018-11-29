@@ -16,7 +16,7 @@
       <HelixWorkItem Include="%(TestPayload.TestName)">
         <Command>%(TestPayload.Command)</Command>
         <PayloadDirectory>%(TestPayload.Identity)</PayloadDirectory>
-        <Timeout>00:30:00</Timeout>
+        <Timeout>%(TestPayload.TestTimeout)</Timeout>
       </HelixWorkItem>
     </ItemGroup>
   </Target>
