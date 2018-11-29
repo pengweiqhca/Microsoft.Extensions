@@ -25,7 +25,8 @@
     <HelixSource>pr/aspnet/extensions</HelixSource>
     <HelixType>ci</HelixType>
     <!-- TODO: use package version -->
-    <HelixBuild>$([System.DateTime]::Now.ToString(yyyyMMdd-hhmmss))</HelixBuild>
+    <HelixBuild Condition=" '$(CI)' == 'true' ">$(BUILD_BUILDNUMBER)</HelixBuild>
+    <HelixBuild Condition=" '$(CI)' != 'true' ">$([System.DateTime]::Now.ToString(yyyyMMdd-hhmmss))</HelixBuild>
     <WaitForWorkItemCompletion>false</WaitForWorkItemCompletion>
 
     <!-- TODO: need job per target queue? <HelixTargetQueues Condition="'$(TestPlatform)' == 'Windows10.x64'">Windows.10.Amd64.Open</HelixTargetQueues>-->
