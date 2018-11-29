@@ -98,6 +98,7 @@
         <!-- <Command>runtests.cmd $(TargetFileName) $(_Microsoft_NETCore_App_Version)</Command> -->
         <Command>runtests.cmd $(TargetFileName) 2.1.500</Command>
         <TestPlatform>%(DistributedTestPlatform.Identity)</TestPlatform>
+        <TestTimeout>$(DistributedTestTimeout)</TestTimeout>
       </TestPayload>
     </ItemGroup>
   </Target>
