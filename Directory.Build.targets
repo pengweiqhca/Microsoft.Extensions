@@ -117,7 +117,7 @@
       <TestPayload Include="$(PublishAbsoluteDir.TrimEnd('\').TrimEnd('\'))">
         <TestAssembly>$(TargetFileName)</TestAssembly>
         <TestName>$(MSBuildProjectName)/$(TargetFramework)</TestName>
-        <!-- <Command>runtests.cmd $(TargetFileName) $(_Microsoft_NETCore_App_Version)</Command> -->
+        <!-- Look into how to be able to use $(NETCoreSdkVersion) -->
         <Command Condition="'$(HelixTargetQueue)' == 'Windows.10.Amd64.Open'">%HELIX_CORRELATION_PAYLOAD%\$(TargetFramework)\runtests.cmd %HELIX_CORRELATION_PAYLOAD%\$(TargetFramework)\$(TargetFileName) 2.1.500</Command>
         <Command Condition="'$(HelixTargetQueue)' != 'Windows.10.Amd64.Open'">$HELIX_CORRELATION_PAYLOAD/$(TargetFramework)/runtests.sh $HELIX_CORRELATION_PAYLOAD/$(TargetFramework)/$(TargetFileName) 2.1.500</Command>
         <TestPlatform>%(DistributedTestPlatform.Identity)</TestPlatform>
